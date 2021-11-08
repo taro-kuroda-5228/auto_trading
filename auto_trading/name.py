@@ -13,13 +13,12 @@ class Name:
         nationality: listed country
     
     Typical usage example:
-    my_share = Name(name, nationality).get_my_share
+        my_share = Name(name, nationality).get_my_share
     """
     
     def __init__(self, name: str, nationality: str):
         self.name = name
-        self.nationality = nationality
-    
+        self.nationality = nationality 
     def add_suffix_tse(self)-> str:
         
         """Function to get Japanese stock's name properly.
@@ -30,9 +29,7 @@ class Name:
             if self.name[-2:] != '.T':
                 self.name += '.T'
                 
-        return self.name
-    
-    def get_my_share(self):
+    def get_my_share(self)-> method:
     
         """Function to get information from yahoo finance api2.
         You can get stock datas by adding company name
