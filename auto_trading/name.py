@@ -29,7 +29,7 @@ class Name:
             if self.name[-2:] != '.T':
                 self.name += '.T'
                 
-    def get_my_share(self)-> method:
+    def get_my_share(self)-> yahoo_finance_api2.share.Share:
     
         """Function to get information from yahoo finance api2.
         You can get stock datas by adding company name
