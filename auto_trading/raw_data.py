@@ -1,11 +1,14 @@
 """RawData class is included.
 """
 
+import sys
 import datetime
 import pandas as pd
-from yahoo_finance_api2 import share
+#from yahoo_finance_api2 import share
+sys.path.append("C:\\Users\\User\\Work\\auto_trading\\auto_trading")
+from symbol_data import SymbolData
 
-class RawData:
+class RawData(SymbolData):
     
     """Module to get stock price information during the wanted duration.
 
@@ -26,17 +29,37 @@ class RawData:
         self.nationality = nationality
         self.start_date = start_date
         self.days = days
-    
-    def add_suffix_tse(self)-> str:
         
-        """Function only for use in time_series_data
-        If nationality is Japan, add '.T' at the end of name
+    def preprocess_symbol_data(self)-> pd.DataFrame:
+        
+        """Function to get pd.DataFrame from symbol_data.
+        
+        return 
+            columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+            index = ['datetime'], type = '%Y-%m-%d', ascending=False
+            
+        In this function, you can point the date from when you can get the price information before by appointing the date '%Y-%m-%d' type
         """
         
-        if self.nationality == 'JP':
-            if self.name[-2:] != '.T':
-                self.name += '.T'
-        return self.name
+        df = pd.DataFrame(self.get_symbol_data)
+        df["datetime"] = pd.to_datetime(df.timestamp, unit="ms").dt.strftime('%Y-%m-%d')
+        df.set_index('datetime',drop=True,inplace=True)
+        df = df.sort_index(ascending=False)
+        end_date = pd.to_datetime(self.start_date)-datetime.timedelta(days=self.days-1)
+        end_date = end_date.strftime('%Y-%m-%d')
+        df = df.loc[self.start_date:end_date,:]
+        return df
+    
+#     def add_suffix_tse(self)-> str:
+        
+#         """Function only for use in time_series_data
+#         If nationality is Japan, add '.T' at the end of name
+#         """
+        
+#         if self.nationality == 'JP':
+#             if self.name[-2:] != '.T':
+#                 self.name += '.T'
+#         return self.name
 
 #     def end_date(self):
 #        """Function only for use in time_series_data
@@ -48,34 +71,37 @@ class RawData:
     @property
     def time_series_data(self)-> pd.DataFrame: 
         
-    """Make timeseries table.
-
-    return 
-        columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-        index = ['datetime'], type = '%Y-%m-%d', ascending=False
-
-    """
-    
-        self.add_suffix_tse
-         
-        my_share = share.Share(self.name)
-        symbol_data = None
-
-        try:
-            symbol_data = my_share.get_historical(
-                share.PERIOD_TYPE_WEEK, 30,
-                share.FREQUENCY_TYPE_DAY, 1)
-        except YahooFinanceError as e:
-            print(e.message)
-            sys.exit(1)
-
-        df = pd.DataFrame(symbol_data)
-        df["datetime"] = pd.to_datetime(df.timestamp, unit="ms").dt.strftime('%Y-%m-%d')
-        df.set_index('datetime',drop=True,inplace=True)
-        df = df.sort_index(ascending=False)
-        end_date = pd.to_datetime(self.start_date)-datetime.timedelta(days=self.days-1)
-        end_date = end_date.strftime('%Y-%m-%d')
-        df = df.loc[self.start_date:end_date,:]
+        """Make timeseries table.
+        Please see the docstring in 'preprocess_symbol_data' function
+        """
         
+        df = self.preprocess_symbol_data
         return df
+    
+#         self.add_suffix_tse        
+#         my_share = share.Share(self.name)
+#         symbol_data = None
+#        my_share = self.get_my_share
+
+#         try:
+#             symbol_data = my_share.get_historical(
+#                 share.PERIOD_TYPE_WEEK, 30,
+#                 share.FREQUENCY_TYPE_DAY, 1)
+#         except YahooFinanceError as e:
+#             print(e.message)
+#             sys.exit(1)
+#         symbol_data = self.get_symbol_data
+
+#         df = pd.DataFrame(self.get_symbol_data)
+#         df["datetime"] = pd.to_datetime(df.timestamp, unit="ms").dt.strftime('%Y-%m-%d')
+#         df.set_index('datetime',drop=True,inplace=True)
+#         df = df.sort_index(ascending=False)
+#         end_date = pd.to_datetime(self.start_date)-datetime.timedelta(days=self.days-1)
+#         end_date = end_date.strftime('%Y-%m-%d')
+#         df = df.loc[self.start_date:end_date,:]      
+#         return df
+    
+#        df = self.preprocess_symbol_data
+    
+#        return df
     
